@@ -51,6 +51,7 @@
     <title>Dune</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    
 </head>
 
 <body>
@@ -77,14 +78,16 @@
         Set on the desert planet Arrakis, Dune is the story of the boy Paul Atreides, heir to a noble family tasked with ruling an inhospitable world where the only thing of value is the “spice” melange, a drug capable of extending life and enhancing consciousness. Coveted across the known universe, melange is a prize worth killing for.
     </div>
     <div class="readlist">
-        <button id="readlist" class="btn btn-secondary ml-3">Add to Want to Read List</button>
+        <form action="/readlist" method="POST">
+            <button id="readlist" class="btn btn-secondary ml-3">Add to Want to Read List</button>
+        </form>
+        <a href="/home">Go home</a>
     </div>
     <div class="video">
         <video width="480" height="360" controls>
             <source src="/dune.mp4">
         </video>
     </div>
-
 </body>
 
 </html>

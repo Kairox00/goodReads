@@ -1,16 +1,1 @@
-{
-    "users": [
-        {
-            "username": "Amira",
-            "password": "bbbb"
-        },
-        {
-            "username": "Khaled",
-            "password": "aaaa"
-        },
-        {
-            "username": "Shahd",
-            "password": "cccc"
-        }
-    ]
-}
+{"users":[{"username":"Amira","password":"bbbb","readList":[]},{"username":"Khaled","password":"aaaa","readList":[]},{"username":"Shahd","password":"cccc","readList":[]},{"username":"test","password":"test","readList":[{"name":"dune","link":"/dune","title":"Dune"}]}]}

@@ -55,7 +55,7 @@
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-2">
-        <a class="navbar-brand" style="color: rgb(191, 255, 161)">Lord of the Flies</a>
+        <a name="title" class="navbar-brand" style="color: rgb(191, 255, 161)">Lord of the Flies</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -77,7 +77,10 @@
         At the dawn of the next world war, a plane crashes on an uncharted island, stranding a group of schoolboys. At first, with no adult supervision, their freedom is something to celebrate; this far from civilization the boys can do anything they want. Anything.
     </div>
     <div class="readlist">
-        <button id="readlist" class="btn btn-secondary ml-3">Add to Want to Read List</button>
+        <form action="/readlist" method="POST">
+            <span name="title" value="Lord of the flies"></span>
+            <button id="readlist" class="btn btn-secondary ml-3">Add to Want to Read List</button>
+        </form>
     </div>
     <div class="video">
         <video width="480" height="360" controls>

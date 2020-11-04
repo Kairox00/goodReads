@@ -7,7 +7,7 @@ users = require("./users.json"),
 books = require("./books.json"),
 app = express();
 
-var loggedUser = null;
+loggedUser = null;
 
 
 app.use(express.json());
@@ -36,6 +36,7 @@ app.post("/",(req,res)=>{
         }
         else{
             res.redirect("/home");
+            console.log(loggedUser);
         }
     }
 
@@ -48,10 +49,12 @@ app.get("/registration",(req,res)=>{
 app.post("/registration",(req,res)=>{
     let username = req.body.username;
     let password = req.body.password;
+    let readList = [];
     let user = 
     {
         username: username,
-        password: password
+        password: password,
+        readList: []
     };
     
     if(checkUserExists(username,users) !== false){
@@ -76,12 +79,32 @@ app.get("/home",isLoggedIn,(req,res)=>{
 app.post("/search",isLoggedIn,(req,res)=>{
     console.log(req.body.Search);
     let bookName = req.body.Search;
-    res.render("searchresults");
+    let results = getBook(books["books"], bookName);
+    res.render("searchresults",{results: results});
 })
 
+//========= Read List ==========
 
 app.get("/readlist",isLoggedIn,(req,res)=>{
-    res.render("readlist");
+    res.render("readlist",{loggedUser: loggedUser});
+});
+
+app.post("/readlist",(req,res)=>{
+    let referer = req.get("referer")
+    let name = truncate(referer);
+    let link = "/" + name;
+    let title = getTitle(books["books"], name);
+    console.log(title);
+    let book =
+    {
+        name: name,
+        link: link,
+        title: title
+    }
+    addToList(users["users"], loggedUser["username"], book);
+    fs.writeFileSync("users.json",JSON.stringify(users));
+    
+    res.redirect("/readlist");
 });
 
 
@@ -124,7 +147,6 @@ app.get("/leaves",isLoggedIn,(req,res)=>{
 });
 
 
-
 function checkUserExists(username,users){
     for(let i=0;i<users["users"].length;i++){
             if(users["users"][i]["username"].toLowerCase() === username.toLowerCase()){        
@@ -136,7 +158,7 @@ function checkUserExists(username,users){
 };
 
 function isLoggedIn(req,res,next){
-    // console.log(loggedUser);
+    
     if(loggedUser !== null){
         return next();
     }
@@ -146,10 +168,57 @@ function isLoggedIn(req,res,next){
     }
 }
 
+function truncate (url){
+    var res="";
+    var start = false;
+    for(var i = 0; i < url.length ; i++){
+        if(start === true){
+            // console.log("adding");
+            res+= url[i];
+            // console.log(url[i]);
+            // console.log(res)
+        }
+        if(url[i] === "/" && (url[i+1] !== "/" && url[i-1] !== "/" ) && start === false){
+            start = true;
+        }
+        
+    }
+    return res;
+}
+
+function addToList(usersList, loggedUsername, book){
+    for(var i=0; i<usersList.length; i++){
+        console.log(loggedUsername);
+        console.log(usersList[i]["username"]);
+        if(loggedUsername === usersList[i]["username"]){
+            usersList[i]["readList"].push(book);
+            console.log(book["name"]+" added");
+        }
+    }
+    console.log("something went wrong");
+}
+
+function getTitle(booksList, name){
+    for(var i=0; i<booksList.length; i++){
+        if(booksList[i]["name"] === name){
+            return booksList[i]["title"];
+        }
+    }
+}
+
+function getBook(booksList, name){
+    for(var i=0; i<booksList.length; i++){
+        if(booksList[i]["name"] === name){
+            return booksList[i];
+        }
+    }
+    return false;
+}
 
 
 app.listen(3000, function(){
     console.log(loggedUser);
+    console.log(users);
     // if(checkUserExists("mira",users) !== false){
     //     console.log("User already exists");
     // }
