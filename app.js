@@ -206,11 +206,23 @@ function getTitle(booksList, name){
     }
 }
 
-function getBook(booksList, name){
+function getBook(booksList, searchWord){
+    let results=[];
     for(var i=0; i<booksList.length; i++){
-        if(booksList[i]["name"] === name){
-            return booksList[i];
+        let title = booksList[i]["title"].toLowerCase();
+        searchWord = searchWord.toLowerCase();
+        if(title.includes(searchWord)){
+            results.push(booksList[i]);
         }
+        else{
+            if(searchWord.includes(title)){
+                results.push(booksList[i]);
+            }
+        }
+    }
+    if(results.length !== 0){
+        console.log("results: "+results);
+        return results;
     }
     return false;
 }

@@ -41,8 +41,12 @@
     </nav>
     <% if(results === false){ %>
         <h2>Book not found</h2>
-    <% }else{ %>
-        <li><a id="results" href="/<%= results["name"] %>"><%= results["title"] %></a></li>
+    <% } else{ %>
+        <ul>
+        <%  for(var i=0; i<results.length; i++){ %>
+            <li><a id="results" href="/<%= results[i]["name"] %>"><%= results[i]["title"] %></a></li>
+        <% } %>
+        </ul>
     <% } %>
 </body>
 </html>
