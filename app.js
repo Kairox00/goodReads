@@ -228,7 +228,7 @@ function getBook(booksList, searchWord){
 }
 
 
-app.listen(3000, function(){
+app.listen(process.env.PORT || 3000, function(){
     console.log(loggedUser);
     console.log(users);
     // if(checkUserExists("mira",users) !== false){
