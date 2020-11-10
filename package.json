@@ -14,5 +14,8 @@
     "heroku": "^7.47.0",
     "method-override": "^3.0.0",
     "nodemon": "^2.0.6"
+  },
+  "engines": {
+    "node": "12.x"
   }
 }
