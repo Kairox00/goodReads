@@ -39,6 +39,11 @@
             </form>
         </div>
     </nav>
+    <div class="container" style="margin-top: 5px;">
+        <% if(error && error.length > 0){ %>
+        <div class="alert alert-danger"><%= error %></div>
+        <% } %>
+    </div>
     <div id="readList">
         <ul>
             <% for (var i=0; i<loggedUser["readList"].length; i++){ %>

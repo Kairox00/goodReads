@@ -5,15 +5,27 @@ fs = require("fs"),
 bodyParser = require("body-parser"),
 users = require("./users.json"),
 books = require("./books.json"),
+flash = require("connect-flash"),
 app = express();
 
-loggedUser = null;
+var loggedUser = null;
 
 
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(express.static(__dirname + "/public"));
 app.use(methodOverride("_method"));
+app.use(require("express-session")({
+    secret:"Secter whatev",
+    resave: false,
+    saveUninitialized: false,
+}));
+app.use(flash()); 
+app.use((req,res,next)=>{
+    res.locals.error = req.flash("error");
+    // res.locals.success = req.flash("success");
+    next();
+});
 
 app.set("view engine","ejs");
 
@@ -27,12 +39,14 @@ app.post("/",(req,res)=>{
     let username = req.body.username;
     let password = req.body.password;
     if(checkUserExists(username,users)==false){
-        res.send("User does not exist");
+        req.flash("error","User does not exist");
+        res.redirect("/");
     }
     else{
         loggedUser = checkUserExists(username,users);
         if(loggedUser.password !== password){
-            res.send("Password is incorrect");
+            req.flash("error","Password is incorrect");
+            res.redirect("/");
         }
         else{
             res.redirect("/home");
@@ -58,7 +72,9 @@ app.post("/registration",(req,res)=>{
     };
     
     if(checkUserExists(username,users) !== false){
-        res.send("User already exists");
+        // res.send("User already exists");
+        req.flash("error","User already exists");
+        res.redirect("/registration");
     }
     else{
         users["users"].push(user);
@@ -101,8 +117,15 @@ app.post("/readlist",(req,res)=>{
         link: link,
         title: title
     }
-    addToList(users["users"], loggedUser["username"], book);
-    fs.writeFileSync("users.json",JSON.stringify(users));
+    let addingResult = addToList(users["users"], loggedUser["username"], book);
+    if(addingResult === 0){
+        req.flash("error","Book already exists in list");
+        console.log("book not added");
+    }
+    else{
+        fs.writeFileSync("users.json",JSON.stringify(users));
+    }
+    
     
     res.redirect("/readlist");
 });
@@ -163,6 +186,7 @@ function isLoggedIn(req,res,next){
         return next();
     }
     else{
+        req.flash("error", "You must login first");
         res.redirect("/");
         console.log("login first");
     }
@@ -188,11 +212,19 @@ function truncate (url){
 
 function addToList(usersList, loggedUsername, book){
     for(var i=0; i<usersList.length; i++){
-        console.log(loggedUsername);
-        console.log(usersList[i]["username"]);
+        // console.log(loggedUsername);
+        // console.log(usersList[i]["username"]);
         if(loggedUsername === usersList[i]["username"]){
-            usersList[i]["readList"].push(book);
-            console.log(book["name"]+" added");
+            console.log(loggedUsername + "list accessed");
+            if(checkBookExists(usersList[i]["readList"], book) === false){
+                console.log(book["name"]+" added");
+                usersList[i]["readList"].push(book); 
+            }
+            else{
+                console.log("book exists");
+                return 0;
+            }
+                
         }
     }
     console.log("something went wrong");
@@ -223,6 +255,16 @@ function getBook(booksList, searchWord){
     if(results.length !== 0){
         console.log("results: "+results);
         return results;
+    }
+    return false;
+}
+
+function checkBookExists(readlist,book){
+    for(var i=0; i<readlist.length ; i++){
+        console.log(readlist[i].name + "/" +book.name);
+        if(readlist[i].name === book.name){
+            return true;
+        }
     }
     return false;
 }
