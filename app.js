@@ -8,7 +8,7 @@ books = require("./books.json"),
 flash = require("connect-flash"),
 app = express();
 
-var loggedUser = null;
+var loggedUser;
 
 
 app.use(express.json());
@@ -87,6 +87,7 @@ app.post("/registration",(req,res)=>{
 //======= Home Page =======
 
 app.get("/home",isLoggedIn,(req,res)=>{
+    console.log(req.user + "at home");
     res.render("home");
 });
 
@@ -102,10 +103,12 @@ app.post("/search",isLoggedIn,(req,res)=>{
 //========= Read List ==========
 
 app.get("/readlist",isLoggedIn,(req,res)=>{
+    console.log(loggedUser["username"] + "at list");
     res.render("readlist",{loggedUser: loggedUser});
+    
 });
 
-app.post("/readlist",(req,res)=>{
+app.post("/readlist",isLoggedIn,(req,res)=>{
     let referer = req.get("referer")
     let name = truncate(referer);
     let link = "/" + name;
@@ -124,6 +127,7 @@ app.post("/readlist",(req,res)=>{
     }
     else{
         fs.writeFileSync("users.json",JSON.stringify(users));
+        req.flash("error",loggedUser["username"] + "added a book");
     }
     
     
@@ -181,8 +185,8 @@ function checkUserExists(username,users){
 };
 
 function isLoggedIn(req,res,next){
-    
-    if(loggedUser !== null){
+    console.log(loggedUser);
+    if(loggedUser !== undefined){
         return next();
     }
     else{
@@ -272,7 +276,7 @@ function checkBookExists(readlist,book){
 
 app.listen(process.env.PORT || 3000, function(){
     console.log(loggedUser);
-    console.log(users);
+    // console.log(users);
     // if(checkUserExists("mira",users) !== false){
     //     console.log("User already exists");
     // }
