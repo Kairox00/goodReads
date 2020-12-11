@@ -32,6 +32,7 @@ app.set("view engine","ejs");
 //======= Login and Register =========
 
 app.get("/",(req,res)=>{
+    console.log(loggedUser)
     res.render("login");
 });
 
@@ -50,7 +51,7 @@ app.post("/",(req,res)=>{
         }
         else{
             res.redirect("/home");
-            console.log(loggedUser);
+            
         }
     }
 
@@ -78,6 +79,7 @@ app.post("/registration",(req,res)=>{
     }
     else{
         users["users"].push(user);
+        // loggedUser = "x";
         fs.writeFileSync("users.json",JSON.stringify(users));
         res.redirect("/");
     }
@@ -87,7 +89,6 @@ app.post("/registration",(req,res)=>{
 //======= Home Page =======
 
 app.get("/home",isLoggedIn,(req,res)=>{
-    console.log(req.user + "at home");
     res.render("home");
 });
 
@@ -103,7 +104,6 @@ app.post("/search",isLoggedIn,(req,res)=>{
 //========= Read List ==========
 
 app.get("/readlist",isLoggedIn,(req,res)=>{
-    console.log(loggedUser["username"] + "at list");
     res.render("readlist",{loggedUser: loggedUser});
     
 });
@@ -113,7 +113,7 @@ app.post("/readlist",isLoggedIn,(req,res)=>{
     let name = truncate(referer);
     let link = "/" + name;
     let title = getTitle(books["books"], name);
-    console.log(title);
+    // console.log(title);
     let book =
     {
         name: name,
@@ -123,11 +123,11 @@ app.post("/readlist",isLoggedIn,(req,res)=>{
     let addingResult = addToList(users["users"], loggedUser["username"], book);
     if(addingResult === 0){
         req.flash("error","Book already exists in list");
-        console.log("book not added");
+        // console.log("book not added");
     }
     else{
         fs.writeFileSync("users.json",JSON.stringify(users));
-        req.flash("error",loggedUser["username"] + "added a book");
+        // req.flash("error",loggedUser["username"] + "added a book");
     }
     
     
@@ -185,7 +185,6 @@ function checkUserExists(username,users){
 };
 
 function isLoggedIn(req,res,next){
-    console.log(loggedUser);
     if(loggedUser !== undefined){
         return next();
     }
@@ -219,10 +218,11 @@ function addToList(usersList, loggedUsername, book){
         // console.log(loggedUsername);
         // console.log(usersList[i]["username"]);
         if(loggedUsername === usersList[i]["username"]){
-            console.log(loggedUsername + "list accessed");
+            console.log(loggedUsername + " list accessed");
             if(checkBookExists(usersList[i]["readList"], book) === false){
                 console.log(book["name"]+" added");
                 usersList[i]["readList"].push(book); 
+                return;
             }
             else{
                 console.log("book exists");
@@ -231,7 +231,6 @@ function addToList(usersList, loggedUsername, book){
                 
         }
     }
-    console.log("something went wrong");
 }
 
 function getTitle(booksList, name){
@@ -265,7 +264,7 @@ function getBook(booksList, searchWord){
 
 function checkBookExists(readlist,book){
     for(var i=0; i<readlist.length ; i++){
-        console.log(readlist[i].name + "/" +book.name);
+        // console.log(readlist[i].name + "/" +book.name);
         if(readlist[i].name === book.name){
             return true;
         }
@@ -275,7 +274,7 @@ function checkBookExists(readlist,book){
 
 
 app.listen(process.env.PORT || 3000, function(){
-    console.log(loggedUser);
+    // console.log(loggedUser);
     // console.log(users);
     // if(checkUserExists("mira",users) !== false){
     //     console.log("User already exists");
