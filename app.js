@@ -6,7 +6,9 @@ bodyParser = require("body-parser"),
 users = require("./users.json"),
 books = require("./books.json"),
 flash = require("connect-flash"),
+session = require("express-session"),
 app = express();
+
 
 var loggedUser;
 
@@ -15,13 +17,14 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(express.static(__dirname + "/public"));
 app.use(methodOverride("_method"));
-app.use(require("express-session")({
+app.use(session({
     secret:"Secter whatev",
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
 }));
 app.use(flash()); 
 app.use((req,res,next)=>{
+    res.locals.currentUser = req.user;
     res.locals.error = req.flash("error");
     // res.locals.success = req.flash("success");
     next();
@@ -32,7 +35,6 @@ app.set("view engine","ejs");
 //======= Login and Register =========
 
 app.get("/",(req,res)=>{
-    console.log(loggedUser)
     res.render("login");
 });
 
@@ -44,8 +46,9 @@ app.post("/",(req,res)=>{
         res.redirect("/");
     }
     else{
-        loggedUser = checkUserExists(username,users);
-        if(loggedUser.password !== password){
+        req.session.user = checkUserExists(username,users);
+        // loggedUser = req.session.user;
+        if(req.session.user.password !== password){
             req.flash("error","Password is incorrect");
             res.redirect("/");
         }
@@ -89,7 +92,9 @@ app.post("/registration",(req,res)=>{
 //======= Home Page =======
 
 app.get("/home",isLoggedIn,(req,res)=>{
-    res.render("home");
+    res.render("home",{user: req.session.user});
+    // console.log("loggedUser is " +loggedUser.username);
+    console.log("sessionUser is " + req.session.user["username"]);
 });
 
 //======== Search ========
@@ -104,7 +109,8 @@ app.post("/search",isLoggedIn,(req,res)=>{
 //========= Read List ==========
 
 app.get("/readlist",isLoggedIn,(req,res)=>{
-    res.render("readlist",{loggedUser: loggedUser});
+    console.log(req.session.user.readList);
+    res.render("readlist",{loggedUser: req.session.user});
     
 });
 
@@ -120,12 +126,13 @@ app.post("/readlist",isLoggedIn,(req,res)=>{
         link: link,
         title: title
     }
-    let addingResult = addToList(users["users"], loggedUser["username"], book);
+    let addingResult = addToList(users["users"], req.session.user["username"], book);
     if(addingResult === 0){
         req.flash("error","Book already exists in list");
         // console.log("book not added");
     }
     else{
+        req.session.user["readList"].push(book);
         fs.writeFileSync("users.json",JSON.stringify(users));
         // req.flash("error",loggedUser["username"] + "added a book");
     }
@@ -185,7 +192,7 @@ function checkUserExists(username,users){
 };
 
 function isLoggedIn(req,res,next){
-    if(loggedUser !== undefined){
+    if(req.session.user !== undefined){
         return next();
     }
     else{
